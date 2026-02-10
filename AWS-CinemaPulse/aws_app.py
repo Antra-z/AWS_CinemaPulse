@@ -1,12 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import uuid
 from datetime import datetime
+from decimal import Decimal
 import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 
 app = Flask(__name__)
-app.secret_key = "palak_cinemaPulse_secret_key"
+app.secret_key = "CinemaPulse_secret_key"
 
 # ================= AWS CONFIG =================
 REGION = "us-east-1"
@@ -119,9 +120,9 @@ def update_movie_rating(movie_id):
     feedbacks = get_feedbacks_for_movie(movie_id)
 
     if not feedbacks:
-        new_rating = 0.0
+        new_rating = Decimal("0.0")
     else:
-        new_rating = round(sum(f["rating"] for f in feedbacks) / len(feedbacks), 1)
+        new_rating = Decimal(str(round(sum(float(f["rating"]) for f in feedbacks) / len(feedbacks), 1)))
 
     movies_table.update_item(
         Key={"id": movie_id},
@@ -142,7 +143,6 @@ This section:
 3. Creates initial analytics entries
 
 DO NOT RUN THIS AGAIN AFTER FIRST SUCCESSFUL EXECUTION.
-"""
 
 # Initial Movies
 initial_movies = [
@@ -152,7 +152,7 @@ initial_movies = [
         "genre": "Action",
         "language": "Hindi",
         "image": "https://wallpaperaccess.com/full/9335215.jpg",
-        "rating": 4.4
+        "rating": Decimal("4.4")
     },
     {
         "id": str(uuid.uuid4()),
@@ -160,7 +160,7 @@ initial_movies = [
         "genre": "Drama",
         "language": "English",
         "image": "https://i.pinimg.com/originals/25/74/bc/2574bcaa1d5a9fe6a54e4fd058aefb55.jpg",
-        "rating": 4.1
+        "rating": Decimal("4.1")
     }
 ]
 
@@ -173,7 +173,7 @@ print("Initial movies and analytics seeded successfully.")
 # ==========================================================
 # ================= END RUN ONLY ONCE ======================
 # ==========================================================
-
+"""
 # ================= PUBLIC =================
 @app.route("/")
 def home():
@@ -478,7 +478,7 @@ def add_movie():
     genre = request.form["genre"]
     language = request.form["language"]
     image = request.form["image"]
-    rating = 0.0
+    rating = Decimal("0.0")
 
     movie_id = str(uuid.uuid4())
 
@@ -604,4 +604,3 @@ def delete_feedback():
 # ================= FINAL RUN =================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
