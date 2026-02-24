@@ -387,7 +387,7 @@ def admin_login():
         email = request.form.get("email")
         password = request.form.get("password")
 
-        if email == "admin@example.com" and password == "admin123":
+        if email == "admin@first.com" and password == "admin123":
             session["admin_logged_in"] = True
             send_email_notification(
                 "Admin Login",
